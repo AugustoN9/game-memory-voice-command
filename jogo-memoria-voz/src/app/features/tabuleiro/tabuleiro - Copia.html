@@ -1,0 +1,71 @@
+<div class="container-fluid vh-100 bg-dark text-white p-3 overflow-hidden d-flex flex-column">
+
+  <div *ngIf="status() === GameStatus.SETUP" class="m-auto text-center p-5 bg-secondary rounded shadow-lg" style="max-width: 500px; width: 100%;">
+    <h2 class="mb-4 text-white">Identificação dos Jogadores</h2>
+    <input #p1 type="text" class="form-control form-control-lg mb-3" placeholder="Nome Jogador 1" />
+    <input #p2 type="text" class="form-control form-control-lg mb-4" placeholder="Nome Jogador 2" />
+    <button class="btn btn-primary btn-lg w-100" (click)="iniciarFasePreparacao(p1.value, p2.value)">
+      Iniciar Jogo
+    </button>
+  </div>
+
+  <div *ngIf="status() !== GameStatus.SETUP" class="h-100 d-flex flex-column">
+    <header class="row align-items-center py-2 border-bottom border-secondary mb-3">
+      <div class="col-4">
+        <div class="p-2 rounded mb-1" [class.bg-primary]="currentPlayerIndex() === 0">
+          <h5 class="m-0">👤 {{ players()[0]?.name }}: {{ players()[0]?.score }}</h5>
+        </div>
+        <div class="p-2 rounded" [class.bg-primary]="currentPlayerIndex() === 1">
+          <h5 class="m-0">👤 {{ players()[1]?.name }}: {{ players()[1]?.score }}</h5>
+        </div>
+      </div>
+
+      <div class="col-4 text-center">
+        <div [ngSwitch]="status()">
+          <h2 *ngSwitchCase="GameStatus.STARTING" class="text-info">Inicia em: {{ timer() }}s</h2>
+          <h2 *ngSwitchCase="GameStatus.PREVIEW" class="text-warning fw-bold">MEMORIZEM! {{ timer() }}s</h2>
+          <div *ngSwitchCase="GameStatus.PLAYING">
+            <h3 class="m-0 text-uppercase fw-bold text-primary">Vez de: {{ players()[currentPlayerIndex()]?.name }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4 text-end">
+        <div class="badge rounded-pill p-2" [class.bg-success]="isListening()" [class.bg-danger]="!isListening()">
+          {{ isListening() ? '🎤 Microfone Ativo' : '🎤 Microfone Inativo' }}
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow-1 d-flex align-items-center justify-content-center">
+      <div class="d-grid gap-3"
+           [style.grid-template-columns]="'repeat(' + currentLevel()?.cols + ', auto)'"
+           style="justify-content: center;">
+        <app-card
+          *ngFor="let card of cards(); trackBy: trackByCardId"
+          [card]="card"
+          (click)="status() === GameStatus.PLAYING && aoSelecionarCarta(card.coord)"
+          style="width: 180px; height: 240px;">
+        </app-card>
+      </div>
+    </main>
+  </div>
+
+  <div *ngIf="status() === GameStatus.WON"
+     class="position-absolute top-50 start-50 translate-middle bg-white text-dark p-5 rounded shadow-lg text-center"
+     style="z-index: 2000; min-width: 400px;">
+
+  <h1 class="display-4 text-success fw-bold">Nível Concluído! 🏆</h1>
+  <h3 class="my-3 text-muted">Parabéns aos participantes!</h3>
+
+  <div class="d-grid gap-3 mt-4">
+    <button class="btn btn-success btn-lg fw-bold p-3" (click)="avancarParaProximoNivel()">
+      Próxima Fase ({{ gameService.getProximoLabel() }})
+    </button>
+
+    <button class="btn btn-outline-secondary" (click)="status.set(GameStatus.SETUP)">
+      Sair para o Menu
+    </button>
+  </div>
+</div>
+</div>

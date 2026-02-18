@@ -1,0 +1,70 @@
+:host {
+  display: block;
+  height: 100vh;
+  width: 100vw;
+  background-color: #0f0f0f; /* Fundo escuro realça as cores da PokeAPI */
+  overflow: hidden;
+}
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background: radial-gradient(circle, #2c3e50 0%, #000000 100%);
+  overflow: hidden;
+
+  header {
+    height: 15vh; /* Cabeçalho fixo em 15% da altura */
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* ÁREA DAS CARTAS: 70% DA ALTURA */
+.grid-tabuleiro-area {
+  flex: 0 0 70vh; /* Ocupa exatamente 70% da altura da tela */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.grid-tabuleiro {
+  display: grid;
+  gap: 15px; /* Espaçamento entre as cartas */
+  justify-content: center;
+  align-content: center;
+  height: 100%;
+  width: 100%;
+  max-width: 90vw; /* Limita a largura para não colar nas bordas laterais */
+
+  app-card {
+    /* Ajuste responsivo: o tamanho da carta cresce conforme a altura da tela */
+    height: clamp(100px, 20vh, 300px);
+    aspect-ratio: 3 / 4; /* Proporção clássica de card Pokémon */
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+  }
+}
+
+footer {
+  height: 15vh; /* Rodapé ou área de logs em 15% */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ajuste específico para Smart TVs (telas muito grandes) */
+@media (min-width: 1900px) {
+  .grid-tabuleiro {
+    gap: 30px;
+  }
+}

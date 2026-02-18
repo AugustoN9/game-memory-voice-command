@@ -1,12 +1,13 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, signal } from "@angular/core";
+import { TabuleiroComponent } from "./features/tabuleiro/tabuleiro";
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.scss'
+  standalone: true,
+  selector: "app-root",
+  imports: [TabuleiroComponent],
+  templateUrl: "./app.html",
+  styleUrl: "./app.scss",
 })
 export class App {
-  protected readonly title = signal('jogo-memoria-voz');
+  protected readonly title = signal("jogo-memoria-voz");
 }

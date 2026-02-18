@@ -1,0 +1,135 @@
+<div class="container-fluid vh-100 bg-dark text-white p-3 overflow-hidden d-flex flex-column">
+
+  <div *ngIf="status() === GameStatus.SETUP"
+       class="m-auto text-center p-5 bg-secondary rounded shadow-lg"
+       style="max-width: 500px; width: 100%">
+
+    <h2 class="mb-4 text-white fw-bold text-uppercase">Treinadores Pokémon</h2>
+
+    <div class="d-flex gap-2 mb-4">
+      <button type="button" class="btn flex-fill fw-bold"
+              [class.btn-info]="!isContraMaquina()"
+              [class.btn-outline-light]="isContraMaquina()"
+              (click)="setModoJogo(false)">
+        👥 2 JOGADORES
+      </button>
+      <button type="button" class="btn flex-fill fw-bold"
+              [class.btn-warning]="isContraMaquina()"
+              [class.btn-outline-light]="!isContraMaquina()"
+              (click)="setModoJogo(true)">
+        🤖 VS MÁQUINA
+      </button>
+    </div>
+
+    <div class="mb-3">
+      <input #p1 type="text" class="form-control form-control-lg mb-3" placeholder="Nome Treinador 1" />
+      <input #p2 type="text" class="form-control form-control-lg mb-4"
+             [value]="isContraMaquina() ? 'Máquina 🤖' : ''"
+             [disabled]="isContraMaquina()"
+             placeholder="Nome Treinador 2" />
+    </div>
+
+    <div class="mb-4 p-3 rounded border shadow-sm transition-all"
+         [class.bg-success-subtle]="testeVozSucesso()"
+         [class.border-success]="testeVozSucesso()"
+         [class.text-dark]="testeVozSucesso()"
+         [class.bg-dark-subtle]="!testeVozSucesso()">
+      <div class="d-flex align-items-center justify-content-center">
+        <span class="me-2">{{ testeVozSucesso() ? '✅' : '🎤' }}</span>
+        <small class="fw-bold text-uppercase">
+          {{ testeVozSucesso() ? 'Microfone OK: "' + speechService.transcript() + '"' : 'Fale "Teste" para validar o microfone' }}
+        </small>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-lg w-100 fw-bold p-3"
+            [disabled]="!testeVozSucesso()"
+            (click)="iniciarFasePreparacao(p1.value, p2.value)">
+      INICIAR JORNADA
+    </button>
+  </div>
+
+  <div *ngIf="status() !== GameStatus.SETUP && status() !== GameStatus.CHAMPION" class="h-100 d-flex flex-column">
+    <header class="row align-items-center py-2 border-bottom border-secondary mb-3">
+      <div class="col-4">
+        <div *ngFor="let p of players(); let i = index"
+             class="p-2 rounded mb-1 border"
+             [class.bg-primary]="currentPlayerIndex() === i"
+             [class.border-white]="currentPlayerIndex() === i"
+             [class.border-transparent]="currentPlayerIndex() !== i">
+          <h5 class="m-0 d-flex align-items-center" style="font-size: 1.4rem; text-transform: uppercase">
+            👤 {{ p.name }}: {{ p.score }}
+            <span class="text-warning ms-3 d-flex gap-1">
+              <span *ngFor="let s of [].constructor(p.stars)">⭐</span>
+            </span>
+          </h5>
+        </div>
+      </div>
+
+      <div class="col-4 text-center">
+        <div [ngSwitch]="status()">
+          <h2 *ngSwitchCase="GameStatus.STARTING" class="text-info fw-bold">PREPAREM-SE! {{ timer() }}s</h2>
+          <h2 *ngSwitchCase="GameStatus.PREVIEW" class="text-warning fw-bold">MEMORIZEM! {{ timer() }}s</h2>
+          <div *ngSwitchCase="GameStatus.PLAYING">
+            <h3 class="m-0 text-uppercase fw-bold text-primary">
+              Vez de: {{ players()[currentPlayerIndex()]?.name }}
+            </h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4 text-end">
+        <div class="badge rounded-pill p-3 border shadow-sm"
+             [class.bg-success]="isListening()"
+             [class.bg-danger]="!isListening()">
+          🎤 {{ isListening() ? 'OUVINDO' : 'MICROFONE INATIVO' }}
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow-1 d-flex align-items-center justify-content-center" style="max-height: 70vh;">
+      <div class="d-grid gap-3"
+           [style.grid-template-columns]="'repeat(' + currentLevel()?.cols + ', auto)'"
+           style="justify-content: center">
+        <app-card
+          *ngFor="let card of cards(); trackBy: trackByCardId"
+          [card]="card"
+          (click)="status() === GameStatus.PLAYING && aoSelecionarCarta(card.coord)"
+          style="width: 172px; height: 230px"
+        ></app-card>
+      </div>
+    </main>
+  </div>
+
+  <div *ngIf="status() === GameStatus.WON"
+       class="position-absolute top-50 start-50 translate-middle bg-white text-dark p-5 rounded shadow-lg text-center"
+       style="z-index: 2000; min-width: 450px">
+    <h1 class="display-3 text-success fw-bold">VITÓRIA! 🏆</h1>
+    <div class="d-grid gap-3 mt-4">
+      <button class="btn btn-success btn-lg fw-bold p-3" (click)="avancarParaProximoNivel()">
+        PRÓXIMA FASE ({{ gameService.getProximoLabel() }})
+      </button>
+      <button class="btn btn-outline-secondary" (click)="status.set(GameStatus.SETUP)">VOLTAR AO MENU</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="status() === GameStatus.CHAMPION"
+     class="position-absolute top-0 start-0 w-100 h-100 bg-dark d-flex align-items-center justify-content-center"
+     style="z-index: 3000">
+  <div class="card bg-light text-dark p-5 text-center shadow-lg border-warning border-5" style="max-width: 650px">
+    <h1 class="display-4 fw-bold text-uppercase text-warning">Mestre Pokémon!</h1>
+    <div class="my-4 p-4 bg-white rounded shadow-sm">
+      <h2 class="text-primary fw-bold display-5">
+        {{ players()[0].stars >= players()[1].stars ? players()[0].name : players()[1].name }}
+      </h2>
+      <div class="display-4 text-warning mt-3">
+        <span *ngFor="let s of [].constructor(Math.max(players()[0].stars, players()[1].stars))">⭐</span>
+      </div>
+    </div>
+    <div class="d-grid gap-3">
+      <button class="btn btn-warning btn-lg fw-bold p-3 shadow" (click)="reiniciarJogoTotal()">🔄 RECOMEÇAR TUDO</button>
+      <button class="btn btn-outline-dark" (click)="status.set(GameStatus.SETUP)">MENU INICIAL</button>
+    </div>
+  </div>
+</div>

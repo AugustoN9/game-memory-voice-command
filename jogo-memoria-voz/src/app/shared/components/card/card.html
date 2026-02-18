@@ -1,0 +1,25 @@
+<div
+  class="card-container"
+  [class.flipped]="card.isFlipped || card.isMatched"
+  (click)="onCardClick()"
+>
+  <div class="card-inner W-100 h-100">
+    <div class="card-face card-back d-flex align-items-center justify-content-center bg-primary text-white border rounded shadow-sm">
+      <span class="coord-label fw-bold display-6">{{ card.coord }}</span>
+    </div>
+
+    <div class="card-face card-front bg-white d-flex align-items-center justify-content-center border rounded shadow-sm overflow-hidden">
+      <img
+        [src]="card.value"
+        [alt]="'Pokemon ' + card.coord"
+        class="img-fluid p-2"
+        style="max-height: 100%; object-fit: contain;"
+        loading="lazy"
+      />
+
+      <div class="position-absolute bottom-0 end-0 p-1 px-2 m-1 bg-dark text-white rounded-pill" style="font-size: 0.65rem; opacity: 0.8;">
+        {{ card.coord }}
+      </div>
+    </div>
+  </div>
+</div>
